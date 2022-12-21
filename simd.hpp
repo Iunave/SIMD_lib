@@ -44,14 +44,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endif
 
 #ifdef __AVX__
-#define AVX128 __AVX__
-#pragma message "AVX128 supported"
+#define AVX __AVX__
+#pragma message "AVX supported"
 #endif
 #ifdef __AVX2__
-#define AVX256 __AVX2__
-#pragma message "AVX256 supported"
+#define AVX2 __AVX2__
+#pragma message "AVX2 supported"
 #endif
-#ifdef __AVX512F__
+
+#ifdef __AVX512__
 #define AVX512 __AVX512__
 #pragma message "AVX512 supported"
 #endif
@@ -148,14 +149,14 @@ namespace Simd
 
     INLINE void ZeroUpper()
     {
-#ifdef AVX256
+#ifdef AVX2
         BUILTIN(vzeroupper)();
 #endif
     }
 
     INLINE void ZeroAll()
     {
-#ifdef AVX256
+#ifdef AVX2
         BUILTIN(vzeroall)();
 #endif
     }
@@ -177,7 +178,7 @@ namespace Simd
         return __builtin_shufflevector(Low, High, Index...);
     }
 
-#ifdef AVX128
+#ifdef AVX
 
     ATTRIBUTE(warn_unused_result, always_inline)
     inline uint8x16 CopyOrZero(const uint8x16 Source, const uint8x16 Mask)
@@ -186,7 +187,7 @@ namespace Simd
     }
 
 #endif
-#ifdef AVX256
+#ifdef AVX2
 
     ATTRIBUTE(warn_unused_result, always_inline)
     inline uint8x32 CopyOrZero(const uint8x32 Source, const uint8x32 Mask)
@@ -195,7 +196,7 @@ namespace Simd
     }
 
 #endif
-#ifdef AVX128
+#ifdef AVX
 
     template<typename RegisterType> requires(alignof(RegisterType) == 16)
     inline constexpr int32_t Mask()
@@ -214,8 +215,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename RegisterType> requires(alignof(RegisterType) == 32)
     inline constexpr int32_t Mask()
@@ -238,7 +239,7 @@ namespace Simd
         }
     }
 
-#endif //AVX256
+#endif //AVX2
 #ifdef AVX512
 
     template<typename RegisterType> requires(alignof(RegisterType) == 64)
@@ -267,7 +268,7 @@ namespace Simd
     template<typename T>
     using MaskType = decltype(Mask<T>());
 
-#ifdef AVX128
+#ifdef AVX
 
     template<typename T>
     INLINE constexpr int32_t MoveMask(Vector16<T> VectorMask) MIN_VECTOR_WIDTH(128)
@@ -286,8 +287,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename T>
     INLINE constexpr int32_t MoveMask(Vector32<T> VectorMask) MIN_VECTOR_WIDTH(256)
@@ -306,7 +307,7 @@ namespace Simd
         }
     }
 
-#endif //AVX256
+#endif //AVX2
 #ifdef AVX512
 
     template<typename T>
@@ -331,7 +332,7 @@ namespace Simd
     }
 
 #endif //AVX512
-#ifdef AVX128
+#ifdef AVX
 
     template<typename T> requires(sizeof(T) >= 4)
     INLINE constexpr Vector16<T> MaskLoad(const void* const Value, Vector16<T> Mask) MIN_VECTOR_WIDTH(128)
@@ -360,8 +361,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename T> requires(sizeof(T) >= 4)
     INLINE constexpr Vector32<T> MaskLoad(const void* const Value, Vector32<T> Mask) MIN_VECTOR_WIDTH(256)
@@ -390,7 +391,7 @@ namespace Simd
         }
     }
 
-#endif //AVX256
+#endif //AVX2
 #ifdef AVX512
 
     template<typename T> requires(sizeof(T) >= 4)
@@ -462,7 +463,7 @@ namespace Simd
         return (I1 << 0) | (I2 << 2) | (I3 << 4) | (I4 << 6);
     }
 
-#ifdef AVX128
+#ifdef AVX
 
     //shuffle elements in Source across lanes using Index
         template<int32_t... Index, typename T> requires(sizeof(T) == 4 && sizeof...(Index) == 4)
@@ -478,8 +479,8 @@ namespace Simd
             }
         }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     //shuffle elements in Source across lanes using Index
     template<int32_t... Index, typename T> requires(sizeof(T) == 8 && sizeof...(Index) == 4)
@@ -599,8 +600,8 @@ namespace Simd
         return __builtin_shufflevector(First, Last, 8,  64+8,   9, 64+9,10, 64+10, 11, 64+11,12, 64+12, 13, 64+13,14, 64+14, 15, 64+15,24, 64+24, 25, 64+25,26, 64+26, 27, 64+27,28, 64+28, 29, 64+29,30, 64+30, 31, 64+31,40, 64+40, 41, 64+41,42, 64+42, 43, 64+43,44, 64+44, 45, 64+45,46, 64+46, 47, 64+47,56, 64+56, 57, 64+57,58, 64+58, 59, 64+59,60, 64+60, 61, 64+61,62, 64+62, 63, 64+63);
     }
 
-#endif //AVX256
-#ifdef AVX256
+#endif //AVX2
+#ifdef AVX2
 
     template<uint8_t Control, typename T>
     INLINE constexpr Vector16<T> Extract(Vector32<T> Source)
@@ -619,8 +620,8 @@ namespace Simd
         }
     }
 
-#endif //AVX256
-#ifdef AVX128
+#endif //AVX2
+#ifdef AVX
 
     /// LeftToMul * RightToMul + ToAdd
     template<typename T> requires(sizeof(T) >= 4)
@@ -636,8 +637,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     /// LeftToMul * RightToMul + ToAdd
     template<typename T> requires(sizeof(T) >= 4)
@@ -660,8 +661,8 @@ namespace Simd
         return FusedMultiplyAdd(LeftToMul, RightToMul, ToSub * SetAll<Vector32<T>>(-1));
     }
 
-#endif //AVX256
-#ifdef AVX128
+#endif //AVX2
+#ifdef AVX
 
     template<typename T>
     INLINE constexpr Vector16<T> MakeFromGreater(Vector16<T> Left, Vector16<T> Right) MIN_VECTOR_WIDTH(128)
@@ -738,8 +739,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename T>
     INLINE constexpr Vector32<T> MakeFromGreater(Vector32<T> Left, Vector32<T> Right) MIN_VECTOR_WIDTH(256)
@@ -816,8 +817,8 @@ namespace Simd
         }
     }
 
-#endif //AVX256
-#ifdef AVX128
+#endif //AVX2
+#ifdef AVX
 
     template<typename T>
     INLINE constexpr Vector16<T> MakeFromLesser(Vector16<T> Left, Vector16<T> Right) MIN_VECTOR_WIDTH(128)
@@ -894,8 +895,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename T>
     INLINE constexpr Vector32<T> MakeFromLesser(Vector32<T> Left, Vector32<T> Right) MIN_VECTOR_WIDTH(256)
@@ -972,8 +973,8 @@ namespace Simd
         }
     }
 
-#endif //AVX256
-#ifdef AVX128
+#endif //AVX2
+#ifdef AVX
 
     template<typename T>
     INLINE constexpr void Clamp(Vector16<T>& Source, Vector16<T> Min, Vector16<T> Max) MIN_VECTOR_WIDTH(128)
@@ -982,8 +983,8 @@ namespace Simd
         Source = MakeFromLesser(Source, Max);
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename T>
     INLINE constexpr void Clamp(Vector32<T>& Source, Vector32<T> Min, Vector32<T> Max) MIN_VECTOR_WIDTH(256)
@@ -992,8 +993,8 @@ namespace Simd
         Source = MakeFromLesser(Source, Max);
     }
 
-#endif //AVX256
-#ifdef AVX128
+#endif //AVX2
+#ifdef AVX
 
     template<typename T> requires(std::is_signed_v<T> && std::is_integral_v<T>)
     INLINE constexpr Vector16<T> Absolute(Vector16<T> Source) MIN_VECTOR_WIDTH(128)
@@ -1018,8 +1019,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename T> requires(std::is_signed_v<T>)
     INLINE constexpr Vector32<T> Absolute(Vector32<T> Source) MIN_VECTOR_WIDTH(256)
@@ -1068,7 +1069,7 @@ namespace Simd
         }
     }
 
-#endif //AVX256
+#endif //AVX2
 
     template<typename RegisterType>
     ATTRIBUTE(warn_unused_result, always_inline)
@@ -1106,7 +1107,7 @@ namespace Simd
         *reinterpret_cast<RegisterType*>(Target) = Data;
     }
 
-#ifdef AVX128
+#ifdef AVX
 
     template<typename T> requires(sizeof(T) == 4 || sizeof(T) == 8)
     INLINE constexpr void MaskStore(Vector16<T>* Target, const Vector16<T> Mask, const Vector16<T> Data) MIN_VECTOR_WIDTH(128)
@@ -1135,8 +1136,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename T> requires(sizeof(T) == 4 || sizeof(T) == 8)
     INLINE constexpr void MaskStore(Vector32<T>* Target, const Vector32<T> Mask, const Vector32<T> Data) MIN_VECTOR_WIDTH(256)
@@ -1165,7 +1166,7 @@ namespace Simd
         }
     }
 
-#endif //AVX256
+#endif //AVX2
 #ifdef AVX512
 
     template<typename T> requires(sizeof(T) == 4 || sizeof(T) == 8)
@@ -1233,7 +1234,7 @@ namespace Simd
         }
 
 #endif //AVX512
-#ifdef AVX128
+#ifdef AVX
 
     template<typename T> requires std::is_floating_point_v<T>
     INLINE constexpr Vector16<T> SquareRoot(Vector16<T> Source) MIN_VECTOR_WIDTH(128)
@@ -1248,8 +1249,8 @@ namespace Simd
         }
     }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
     template<typename T> requires std::is_floating_point_v<T>
     INLINE constexpr Vector32<T> SquareRoot(Vector32<T> Source) MIN_VECTOR_WIDTH(256)
@@ -1264,7 +1265,7 @@ namespace Simd
         }
     }
 
-#endif //AVX256
+#endif //AVX2
 #ifdef AVX512
 
     template<typename T> requires std::is_floating_point_v<T>
@@ -1294,7 +1295,7 @@ namespace Simd
 
     static_assert(MakeSelectionMask<int32_t, 0, 1, 0, 1>() == ((0 << 0) | (1 << 1) | (0 << 2) | (1 << 3)));
 
-#ifdef AVX128
+#ifdef AVX
 
     ///
     /// \tparam Control a 0 at index N means that the N element of SourceOne will be used, a 1 at index N means that the N element of SourceTwo will be used.
@@ -1319,7 +1320,7 @@ namespace Simd
     }
 
 #endif
-#ifdef AVX256
+#ifdef AVX2
 
     ///
     /// \tparam Control a 0 at index N means that the N element of SourceOne will be used, a 1 at index N means that the N element of SourceTwo will be used
@@ -1356,7 +1357,7 @@ namespace Simd
     template<int32_t OffsetScale> requires(OffsetScale == 1 || OffsetScale == 2 || OffsetScale == 4 || OffsetScale == 8)
     INLINE constexpr int64x4 Gather(const void* __restrict BaseAddress, int32x4 Offsets, int64x4 ConditionalLoadMask = {-1, -1, -1, -1}, int64x4 SourceIfMaskNotSet = BUILTIN(undef256)())
     {
-        return BUILTIN(gatherd_q256)(SourceIfMaskNotSet, static_cast<const int64_t*>(BaseAddress), Offsets, ConditionalLoadMask, OffsetScale);
+        return BUILTIN(gatherd_q256)(SourceIfMaskNotSet, static_cast<const long long*>(BaseAddress), Offsets, ConditionalLoadMask, OffsetScale);
     }
 
 #endif
@@ -1480,177 +1481,167 @@ namespace Simd
     }
 } //namespace Simd
 
-#ifdef AVX128
+#ifdef AVX
 
-inline consteval char8x16 operator""_char8_16(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval char8x16 operator""_char8_16(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<char8x16>(Value);
 }
 
-inline consteval int8x16 operator""_int8_16(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval int8x16 operator""_int8_16(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<int8x16>(Value);
 }
 
-inline consteval uint8x16 operator""_uint8_16(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval uint8x16 operator""_uint8_16(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<uint8x16>(Value);
 }
 
-inline consteval int16x8 operator"" _int16_8(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval int16x8 operator"" _int16_8(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<int16x8>(Value);
 }
 
-inline consteval uint16x8 operator""_uint16_8(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval uint16x8 operator""_uint16_8(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<uint16x8>(Value);
 }
 
-inline consteval int32x4 operator""_int32_4(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval int32x4 operator""_int32_4(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<int32x4>(Value);
 }
 
-inline consteval uint32x4 operator""_uint32_4(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval uint32x4 operator""_uint32_4(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<uint32x4>(Value);
 }
 
-inline consteval int64x2 operator""_int64_2(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval int64x2 operator""_int64_2(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<int64x2>(Value);
 }
 
-inline consteval uint64x2 operator""_uint64_2(uint64_t Value) MIN_VECTOR_WIDTH(128)
+inline consteval uint64x2 operator""_uint64_2(unsigned long long Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<uint64x2>(Value);
 }
 
-inline consteval float32x4 operator""_float32_4(float128 Value) MIN_VECTOR_WIDTH(128)
+inline consteval float32x4 operator""_float32_4(long double Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<float32x4>(Value);
 }
 
-inline consteval float64x2 operator""_float64_2(float128 Value) MIN_VECTOR_WIDTH(128)
+inline consteval float64x2 operator""_float64_2(long double Value) MIN_VECTOR_WIDTH(128)
 {
     return Simd::SetAll<float64x2>(Value);
 }
 
-#endif //AVX128
-#ifdef AVX256
+#endif //AVX
+#ifdef AVX2
 
-inline consteval char8x32 operator""_char8_32(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval char8x32 operator""_char8_32(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<char8x32>(Value);
 }
 
-inline consteval int8x32 operator""_int8_32(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval int8x32 operator""_int8_32(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<int8x32>(Value);
 }
 
-inline consteval uint8x32 operator""_uint8_32(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval uint8x32 operator""_uint8_32(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<uint8x32>(Value);
 }
 
-inline consteval int16x16 operator""_int16_16(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval int16x16 operator""_int16_16(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<int16x16>(Value);
 }
 
-inline consteval uint16x16 operator""_uint16_16(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval uint16x16 operator""_uint16_16(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<uint16x16>(Value);
 }
 
-inline consteval int32x8 operator""_int32_8(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval int32x8 operator""_int32_8(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<int32x8>(Value);
 }
 
-inline consteval uint32x8 operator""_uint32_8(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval uint32x8 operator""_uint32_8(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<uint32x8>(Value);
 }
 
-inline consteval int64x4 operator""_int64_4(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval int64x4 operator""_int64_4(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<int64x4>(Value);
 }
 
-inline consteval uint64x4 operator""_uint64_4(uint64_t Value) MIN_VECTOR_WIDTH(256)
+inline consteval uint64x4 operator""_uint64_4(unsigned long long Value) MIN_VECTOR_WIDTH(256)
 {
     return Simd::SetAll<uint64x4>(Value);
 }
 
-inline consteval float32x8 operator""_float32_8(float128 Value) MIN_VECTOR_WIDTH(256)
-{
-    return Simd::SetAll<float32x8>(Value);
-}
-
-inline consteval float64x4 operator""_float64_4(float128 Value) MIN_VECTOR_WIDTH(256)
-{
-    return Simd::SetAll<float64x4>(Value);
-}
-
-#endif //AVX256
+#endif //AVX2
 #ifdef AVX512
 
-inline consteval char8_64 operator""_char8_64(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval char8x64 operator""_char8_64(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<char8_64>(Value);
+    return Simd::SetAll<char8x64>(Value);
 }
 
-inline consteval int8_64 operator""_int8_64(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval int8x64 operator""_int8_64(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<int8_64>(Value);
+    return Simd::SetAll<int8x64>(Value);
 }
 
-inline consteval uint8_64 operator""_uint8_64(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval uint8x64 operator""_uint8_64(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<uint8_64>(Value);
+    return Simd::SetAll<uint8x64>(Value);
 }
 
-inline consteval int16_32 operator""_int16_32(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval int16x32 operator""_int16_32(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<int16_32>(Value);
+    return Simd::SetAll<int16x32>(Value);
 }
 
-inline consteval uint16_32 operator""_uint16_32(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval uint16x32 operator""_uint16_32(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<uint16_32>(Value);
+    return Simd::SetAll<uint16x32>(Value);
 }
 
-inline consteval int32_16 operator""_int32_16(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval int32x16 operator""_int32_16(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<int32_16>(Value);
+    return Simd::SetAll<int32x16>(Value);
 }
 
-inline consteval uint32_16 operator""_uint32_16(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval uint32x16 operator""_uint32_16(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<uint32_16>(Value);
+    return Simd::SetAll<uint32x16>(Value);
 }
 
-inline consteval int64_8 operator""_int64_8(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval int64x8 operator""_int64_8(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<int64_8>(Value);
+    return Simd::SetAll<int64x8>(Value);
 }
 
-inline consteval uint64_8 operator""_uint64_8(uint64_t Value) MIN_VECTOR_WIDTH(512)
+inline consteval uint64x8 operator""_uint64_8(unsigned long long Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<uint64_8>(Value);
+    return Simd::SetAll<uint64x8>(Value);
 }
 
-inline consteval float32_16 operator""_float32_16(float128 Value) MIN_VECTOR_WIDTH(512)
+inline consteval float32x16 operator""_float32_16(long double Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<float32_16>(Value);
+    return Simd::SetAll<float32x16>(Value);
 }
 
-inline consteval float64_8 operator""_float64_8(float128 Value) MIN_VECTOR_WIDTH(512)
+inline consteval float64x8 operator""_float64_8(long double Value) MIN_VECTOR_WIDTH(512)
 {
-    return Simd::SetAll<float64_8>(Value);
+    return Simd::SetAll<float64x8>(Value);
 }
 
 #endif //AVX512
